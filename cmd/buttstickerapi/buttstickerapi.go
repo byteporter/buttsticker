@@ -7,6 +7,7 @@ import (
     "net/http"
     "path/filepath"
     "strings"
+    "strconv"
     "os"
     "encoding/json"
     "io/ioutil"
@@ -25,6 +26,22 @@ func (bh buttstickerHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
     fmt.Fprintf(w, bh.tickers[rand.Intn(len(bh.tickers))])
 }
 
+func (bh buttstickerHandler) GetTickers(w http.ResponseWriter, req *http.Request) {
+    fmt.Fprintf(w, strings.Join(bh.tickers, "\n"))
+}
+
+func (bh buttstickerHandler) GetTicker(w http.ResponseWriter, req *http.Request) {
+    vars := mux.Vars(req)
+    id, _ := strconv.Atoi(vars["id"])
+
+    if id >= len(bh.tickers) {
+        w.WriteHeader(http.StatusNotFound)
+        fmt.Fprintf(w, "Requested id '%d' is out of bounds", id)
+    } else {
+        fmt.Fprintf(w, bh.tickers[id]) 
+    }
+}
+
 func main() {
     var bh buttstickerHandler
 
@@ -41,6 +58,8 @@ func main() {
     apiRouter := router.PathPrefix(apiPrefix).Subrouter()
 
     apiRouter.Handle("/tickers/rand", bh).Methods("GET")
+    apiRouter.HandleFunc("/tickers", bh.GetTickers).Methods("GET")
+    apiRouter.HandleFunc("/tickers/{id:[0-9]+}", bh.GetTicker).Methods("GET")
 
     http.Handle("/", apiRouter)
 
