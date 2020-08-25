@@ -22,8 +22,6 @@ type buttstickerHandler struct {
 }
 
 func (bh buttstickerHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-    w.Header().Set("Vary", "Accept-Encoding")
-
     tickerJson, err := os.Open(filepath.Join(bh.contentDir, "tickers.json"))
     if err != nil {
         fmt.Fprintf(w, err.Error())
