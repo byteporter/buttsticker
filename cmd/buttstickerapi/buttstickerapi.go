@@ -30,6 +30,23 @@ func (bh buttstickerHandler) GetTickers(w http.ResponseWriter, req *http.Request
     fmt.Fprintf(w, strings.Join(bh.tickers, "\n"))
 }
 
+// This should write to file instead of mutating the underlying struct
+func (bh *buttstickerHandler) PostTickers(w http.ResponseWriter, req *http.Request) {
+    log.Println("*** POST Entered")
+
+    if err := req.ParseForm(); err != nil {
+        log.Println("*** POST Error: submission was all kinds of stupid")
+        return
+    }
+    
+    tickerString := req.FormValue("ticker")
+    
+    log.Printf("*** POST content: %s", tickerString)
+    
+    bh.tickers = append(bh.tickers, tickerString)
+    fmt.Fprintf(w, strings.Join(bh.tickers, "\n"))
+}
+
 func (bh buttstickerHandler) GetTicker(w http.ResponseWriter, req *http.Request) {
     vars := mux.Vars(req)
     id, _ := strconv.Atoi(vars["id"])
@@ -60,6 +77,7 @@ func main() {
     apiRouter.Handle("/tickers/rand", bh).Methods("GET")
     apiRouter.HandleFunc("/tickers", bh.GetTickers).Methods("GET")
     apiRouter.HandleFunc("/tickers/{id:[0-9]+}", bh.GetTicker).Methods("GET")
+    apiRouter.HandleFunc("/tickers", bh.PostTickers).Methods("POST")
 
     http.Handle("/", apiRouter)
 
