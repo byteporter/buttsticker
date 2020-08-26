@@ -4,8 +4,8 @@ services:
   httpd:
     image: debian:buster-slim
     volumes:
-      - ./buttstickerapi:/bin/buttstickerapi:ro
-      - ./tickerdata:/usr/share/tickerdata
+      - ../buttstickerapi:/bin/buttstickerapi:ro
+      - ../test/data:/usr/share/tickerdata
     networks:
       - net
     expose:
