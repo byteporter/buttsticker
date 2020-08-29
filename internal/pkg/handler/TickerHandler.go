@@ -13,24 +13,23 @@ import (
     "encoding/json"
 )
 
-type ButtstickerHandler struct {
+type TickerHandler struct {
     TickerFilePath  string
-    h               http.Handler
 }
 
-func (bh ButtstickerHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-    tickers := bh.readFile()
+func (th TickerHandler) GetRandomTicker(w http.ResponseWriter, req *http.Request) {
+    tickers := th.readFile()
     fmt.Fprintf(w, tickers[rand.Intn(len(tickers))])
 }
 
-func (bh ButtstickerHandler) GetTickers(w http.ResponseWriter, req *http.Request) {
-    tickers := bh.readFile()
+func (th TickerHandler) GetTickers(w http.ResponseWriter, req *http.Request) {
+    tickers := th.readFile()
     fmt.Fprintf(w, strings.Join(tickers, "\n"))
 }
 
 // This should write to file instead of mutating the underlying struct
-func (bh *ButtstickerHandler) PostTickers(w http.ResponseWriter, req *http.Request) {
-    tickers := bh.readFile()
+func (th *TickerHandler) PostTickers(w http.ResponseWriter, req *http.Request) {
+    tickers := th.readFile()
     log.Println("*** POST Entered")
 
     if err := req.ParseForm(); err != nil {
@@ -46,8 +45,8 @@ func (bh *ButtstickerHandler) PostTickers(w http.ResponseWriter, req *http.Reque
     fmt.Fprintf(w, strings.Join(tickers, "\n"))
 }
 
-func (bh ButtstickerHandler) GetTicker(w http.ResponseWriter, req *http.Request) {
-    tickers := bh.readFile()
+func (th TickerHandler) GetTicker(w http.ResponseWriter, req *http.Request) {
+    tickers := th.readFile()
     vars := mux.Vars(req)
     id, _ := strconv.Atoi(vars["id"])
 
@@ -59,10 +58,10 @@ func (bh ButtstickerHandler) GetTicker(w http.ResponseWriter, req *http.Request)
     }
 }
 
-func (bh ButtstickerHandler) readFile() ([]string) {
+func (th TickerHandler) readFile() ([]string) {
     var tickers []string
 
-    tickerJson, err := os.Open(bh.TickerFilePath)
+    tickerJson, err := os.Open(th.TickerFilePath)
     if err != nil {
         log.Println(err.Error())
     }

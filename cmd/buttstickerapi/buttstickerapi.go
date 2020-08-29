@@ -12,16 +12,16 @@ import (
 
 
 func main() {
-    bh := handler.ButtstickerHandler{TickerFilePath: filepath.Join("/usr/share/tickerdata", "tickers.json")}
+    th := handler.TickerHandler{TickerFilePath: filepath.Join("/usr/share/tickerdata", "tickers.json")}
 
     apiPrefix := "/api/v1"
     router := mux.NewRouter()
     apiRouter := router.PathPrefix(apiPrefix).Subrouter()
 
-    apiRouter.Handle("/tickers/rand", bh).Methods("GET")
-    apiRouter.HandleFunc("/tickers", bh.GetTickers).Methods("GET")
-    apiRouter.HandleFunc("/tickers/{id:[0-9]+}", bh.GetTicker).Methods("GET")
-    apiRouter.HandleFunc("/tickers", bh.PostTickers).Methods("POST")
+    apiRouter.HandleFunc("/tickers/rand", th.GetRandomTicker).Methods("GET")
+    apiRouter.HandleFunc("/tickers", th.GetTickers).Methods("GET")
+    apiRouter.HandleFunc("/tickers/{id:[0-9]+}", th.GetTicker).Methods("GET")
+    apiRouter.HandleFunc("/tickers", th.PostTickers).Methods("POST")
 
     http.Handle("/", apiRouter)
 
