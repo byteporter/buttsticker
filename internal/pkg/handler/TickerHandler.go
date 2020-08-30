@@ -63,6 +63,25 @@ func (th TickerHandler) GetAchievements(w http.ResponseWriter, req *http.Request
     t.Execute(w, tData)
 }
 
+func (th TickerHandler) GetAchievementsAddform(w http.ResponseWriter, req *http.Request) {
+    log.Println("*** INFO: In GetAchievementsAddform")
+
+    t, err := template.ParseFiles("/usr/share/web/add-achievements.html")
+    if err != nil {
+        log.Println(err)
+        w.WriteHeader(http.StatusInternalServerError)
+        return
+    }
+
+    tData := struct {
+        FormAction string
+    }{
+        "/api/v1/dd6f6992-e6ee-435a-bf63-2d3b90ffd107/tickers",
+    }
+
+    t.Execute(w, tData)
+}
+
 // This should write to file instead of mutating the underlying struct
 func (th TickerHandler) PostTickers(w http.ResponseWriter, req *http.Request) {
     log.Println("*** POST Entered")

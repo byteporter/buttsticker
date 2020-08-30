@@ -8,6 +8,7 @@ import (
     "path/filepath"
     "strings"
     "github.com/gorilla/mux"
+    "fmt"
 
     // "flag"
 )
@@ -18,6 +19,8 @@ func main() {
         filepath.Join("/usr/share/web", "achievements.html"),
     }
 
+    password := "dd6f6992-e6ee-435a-bf63-2d3b90ffd107"
+
     apiPrefix := "/api/v1"
     router := mux.NewRouter()
     apiRouter := router.PathPrefix(apiPrefix).Subrouter()
@@ -25,8 +28,9 @@ func main() {
     apiRouter.HandleFunc("/tickers/rand", th.GetRandomTicker).Methods("GET")
     apiRouter.HandleFunc("/tickers", th.GetTickers).Methods("GET")
     apiRouter.HandleFunc("/tickers/{id:[0-9]+}", th.GetTicker).Methods("GET")
-    apiRouter.HandleFunc("/tickers", th.PostTickers).Methods("POST")
+    apiRouter.HandleFunc(fmt.Sprintf("/%s/tickers", password), th.PostTickers).Methods("POST")
     apiRouter.HandleFunc("/achievements", th.GetAchievements).Methods("GET")
+    apiRouter.HandleFunc(fmt.Sprintf("/%s/achievements/addform", password), th.GetAchievementsAddform).Methods("GET")
 
     http.Handle("/", apiRouter)
 

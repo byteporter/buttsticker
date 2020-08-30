@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Add an Achievement</title>
+    </head>
+    <body>
+        <form name="achievement" action="{{ .FormAction }}" method="POST">
+            <label for="ticker">Ticker String (max 144 characters)</label>
+            <input name="ticker" type="text" maxlength="144">
+            <button type="submit">Add it!</button>
+        </form>
+    </body>
+</html>
