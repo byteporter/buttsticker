@@ -10,5 +10,5 @@ all: buttstickerapi
 clean:
 	$(RM) buttstickerapi
 
-buttstickerapi: cmd/buttstickerapi/buttstickerapi.go
-	CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -a -ldflags '-extldflags "-static"' -o $@ $^
+buttstickerapi: cmd/buttstickerapi/buttstickerapi.go internal/pkg/handler/TickerHandler.go
+	CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -a -tags netgo -ldflags '-w -extldflags "-static"' -o $@ $<
