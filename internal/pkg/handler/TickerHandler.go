@@ -21,24 +21,24 @@ type TickerHandler struct {
 
 func (th TickerHandler) GetRandomTicker(w http.ResponseWriter, req *http.Request) {
     tickers := th.readTickers()
-    fmt.Fprintf(w, tickers[rand.Intn(len(tickers))])
+    fmt.Fprint(w, tickers[rand.Intn(len(tickers))])
 }
 
 func (th TickerHandler) GetTickers(w http.ResponseWriter, req *http.Request) {
-    tickers := th.readFile()
-    fmt.Fprintf(w, strings.Join(tickers, "\n"))
+    tickers := th.readTickers()
+    fmt.Fprint(w, strings.Join(tickers, "\n"))
 }
 
 func (th TickerHandler) GetTicker(w http.ResponseWriter, req *http.Request) {
-    tickers := th.readFile()
+    tickers := th.readTickers()
     vars := mux.Vars(req)
     id, _ := strconv.Atoi(vars["id"])
 
     if id >= len(tickers) {
         w.WriteHeader(http.StatusNotFound)
-        fmt.Fprintf(w, "Requested id '%d' is out of bounds", id)
+        fmt.Fprint(w, "Requested id '%d' is out of bounds", id)
     } else {
-        fmt.Fprintf(w, tickers[id]) 
+        fmt.Fprint(w, tickers[id]) 
     }
 }
 
@@ -118,8 +118,4 @@ func (th TickerHandler) readTickers() ([]string) {
     }
 
     return tickers
-}
-
-func (th TickerHandler) readFile() ([]string) {
-    return th.readTickers()
 }
