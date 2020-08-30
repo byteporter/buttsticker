@@ -17,6 +17,7 @@ services:
       - LETSENCRYPT_HOST=buttsticker.byteporter.com
       - LETSENCRYPT_EMAIL=webmaster@byteporter.com
     entrypoint: ["/bin/buttstickerapi"]
+    restart: always
 
 networks:
   net:
