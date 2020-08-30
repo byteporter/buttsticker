@@ -17,6 +17,7 @@ import (
 type TickerHandler struct {
     DBPath string
     AchievementsTemplatePath string
+    Password string
 }
 
 func (th TickerHandler) GetRandomTicker(w http.ResponseWriter, req *http.Request) {
@@ -76,7 +77,7 @@ func (th TickerHandler) GetAchievementsAddform(w http.ResponseWriter, req *http.
     tData := struct {
         FormAction string
     }{
-        "/api/v1/dd6f6992-e6ee-435a-bf63-2d3b90ffd107/tickers",
+        fmt.Sprintf("/api/v1/%s/tickers", th.Password),
     }
 
     t.Execute(w, tData)
@@ -118,7 +119,7 @@ func (th TickerHandler) readTickers() ([]string) {
     }
     defer db.Close()
     
-    rows, err := db.Query("SELECT content FROM ticker;")
+    rows, err := db.Query("SELECT content FROM ticker WHERE deletetime IS NULL;")
     if err != nil {
         log.Fatal(err)
     }
