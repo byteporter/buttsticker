@@ -31,6 +31,7 @@ func main() {
     passwordRouter.HandleFunc("/tickers", th.PostTickers).Methods("POST")
     passwordRouter.HandleFunc("/tickers", th.DeleteTicker).Methods("DELETE")
     passwordRouter.HandleFunc("/achievements/addform", th.GetAchievementsAddform).Methods("GET")
+    passwordRouter.HandleFunc("/achievements/removeform", th.GetRemoveAchievementForm).Methods("GET")
 
     http.Handle("/", apiRouter)
 

@@ -123,6 +123,27 @@ func (th TickerHandler) PostTickers(w http.ResponseWriter, req *http.Request) {
     th.GetTickers(w, req)
 }
 
+func (th TickerHandler) GetRemoveAchievementForm(w http.ResponseWriter, req *http.Request) {
+    log.Println("*** INFO: In GetRemoveAchievementForm")
+
+    t, err := template.ParseFiles("/usr/share/web/remove-achievements.html")
+    if err != nil {
+        log.Println(err)
+        w.WriteHeader(http.StatusInternalServerError)
+        return
+    }
+
+    tData := struct {
+        RowData []TickerRow
+        FormAction string
+    }{
+        th.readTickers(),
+        fmt.Sprintf("/api/v1/%s/tickers", th.Password),
+    }
+
+    t.Execute(w, tData)
+}
+
 func (th TickerHandler) DeleteTicker(w http.ResponseWriter, req *http.Request) {
     log.Println("*** INFO: DeleteTicker Entered")
 
@@ -150,6 +171,7 @@ func (th TickerHandler) DeleteTicker(w http.ResponseWriter, req *http.Request) {
         log.Fatal(err)
     }
 
+    http.Redirect(w, req, "/api/v1/achievements", http.StatusSeeOther)
     th.GetTickers(w, req)
 }
 

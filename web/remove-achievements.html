@@ -4,7 +4,44 @@
         <title>Remove Achievements</title>
     </head>
     <body>
-        <form name="achievement" action="{{ .FormAction }}" method="DELETE">
-        </form>
+        <section id="listing">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Content</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range .RowData }}
+                    <tr>
+                        <td>{{ .RowID }}</td>
+                        <td>{{ .Content }}</td>
+                        <td>{{ .Createdate }}</td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </section>
+        <input type="hidden" id="deluri" name="deluri" value="{{ .FormAction }}">
+        <label for="id">ID to remove</label>
+        <input id="name" name="id" type="text">
+        <button type="submit" onclick="submitDeleteTicker(null)">Remove</button>
+        <script type="text/javascript">
+            function submitDeleteTicker() {
+                            var id = document.getElementsByName("id")[0].value;
+                            var url = document.getElementById("deluri").value;
+                            var xhr = new XMLHttpRequest();
+                            xhr.open("DELETE", url+'?id='+id, true);
+                            xhr.onreadystatechange = function() {
+                                            if (xhr.readyState == 4) {
+                                                            alert("DELETE completed with status " + xhr.status);
+                                                            location.reload();
+                                                        }
+                                        }
+                            xhr.send(null);
+                        }
+        </script>
     </body>
 </html>
