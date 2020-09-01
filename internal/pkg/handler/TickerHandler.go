@@ -5,10 +5,10 @@ import (
     "strconv"
     "math/rand"
     "net/http"
-    "strings"
     "log"
     "github.com/gorilla/mux"
     "html/template"
+    "encoding/json"
 
     _ "github.com/mattn/go-sqlite3"
     "database/sql"
@@ -26,8 +26,18 @@ func (th TickerHandler) GetRandomTicker(w http.ResponseWriter, req *http.Request
 }
 
 func (th TickerHandler) GetTickers(w http.ResponseWriter, req *http.Request) {
-    tickers := th.readTickers()
-    fmt.Fprint(w, strings.Join(tickers, "\n"))
+    var tickers []string
+    for _, row := range th.readTickers() {
+        tickers = append(tickers, row.Content)
+    }
+
+    tickersJson, err := json.Marshal(tickers)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    fmt.Fprint(w, string(tickersJson))
 }
 
 func (th TickerHandler) GetTicker(w http.ResponseWriter, req *http.Request) {
@@ -44,7 +54,10 @@ func (th TickerHandler) GetTicker(w http.ResponseWriter, req *http.Request) {
 }
 
 func (th TickerHandler) GetAchievements(w http.ResponseWriter, req *http.Request) {
-    tickers := th.readTickers()
+    var tickers []string
+    for _, row := range th.readTickers() {
+        tickers = append(tickers, row.Content)
+    }
 
     log.Println("*** INFO: In GetAchievements")
 
@@ -83,12 +96,12 @@ func (th TickerHandler) GetAchievementsAddform(w http.ResponseWriter, req *http.
     t.Execute(w, tData)
 }
 
-// This should write to file instead of mutating the underlying struct
 func (th TickerHandler) PostTickers(w http.ResponseWriter, req *http.Request) {
     log.Println("*** POST Entered")
 
     if err := req.ParseForm(); err != nil {
-        log.Println("*** POST Error: submission was all kinds of stupid")
+        log.Println("*** ERROR:PostTickers malformed request")
+        w.WriteHeader(http.StatusInternalServerError)
         return
     }
     
@@ -102,7 +115,7 @@ func (th TickerHandler) PostTickers(w http.ResponseWriter, req *http.Request) {
     }
     defer db.Close()
 
-    _, err = db.Exec("INSERT INTO ticker(content) VALUES( $1 )", tickerString)
+    _, err = db.Exec("INSERT INTO ticker(content) VALUES( $1 );", tickerString)
     if err != nil {
         log.Fatal(err)
     }
@@ -110,8 +123,44 @@ func (th TickerHandler) PostTickers(w http.ResponseWriter, req *http.Request) {
     th.GetTickers(w, req)
 }
 
-func (th TickerHandler) readTickers() ([]string) {
-    var tickers []string;
+func (th TickerHandler) DeleteTicker(w http.ResponseWriter, req *http.Request) {
+    log.Println("*** INFO: DeleteTicker Entered")
+
+    if err := req.ParseForm(); err != nil {
+        log.Println("*** ERROR: DeleteTicker malformed request")
+        w.WriteHeader(http.StatusInternalServerError)
+        return
+    }
+
+    tickerId, err := strconv.Atoi(req.FormValue("id"))
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("*** INFO: Delete requested for (%T)id %d", tickerId, tickerId)
+
+    db, err := sql.Open("sqlite3", th.DBPath)
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer db.Close()
+
+    _, err = db.Exec("UPDATE ticker SET deletetime = current_timestamp WHERE rowid = $1;", tickerId)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    th.GetTickers(w, req)
+}
+
+type TickerRow struct {
+    RowID       int
+    Content     string
+    Createdate  string
+}
+
+func (th TickerHandler) readTickers() ([]TickerRow) {
+    var tickers []TickerRow;
 
     db, err := sql.Open("sqlite3", th.DBPath)
     if err != nil {
@@ -119,18 +168,19 @@ func (th TickerHandler) readTickers() ([]string) {
     }
     defer db.Close()
     
-    rows, err := db.Query("SELECT content FROM ticker WHERE deletetime IS NULL;")
+    rows, err := db.Query("SELECT rowid, content, createtime FROM ticker WHERE deletetime IS NULL;")
     if err != nil {
         log.Fatal(err)
     }
     defer rows.Close()
     for rows.Next() {
-        var content string
-        err = rows.Scan(&content)
+        var row TickerRow 
+
+        err = rows.Scan(&row.RowID, &row.Content, &row.Createdate)
         if err != nil {
             log.Fatal(err)
         }
-        tickers = append(tickers, content)
+        tickers = append(tickers, row)
     }
     err = rows.Err()
     if err != nil {

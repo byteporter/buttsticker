@@ -8,7 +8,6 @@ import (
     "path/filepath"
     "strings"
     "github.com/gorilla/mux"
-    "github.com/gorilla/handlers"
 
     // "flag"
 )
@@ -23,19 +22,20 @@ func main() {
     apiPrefix := "/api/v1"
     router := mux.NewRouter()
     apiRouter := router.PathPrefix(apiPrefix).Subrouter()
-    passwordRouter := apiRouter.PathPrefix(th.Password)
+    passwordRouter := router.PathPrefix(apiPrefix + "/" + th.Password).Subrouter()
 
     apiRouter.HandleFunc("/tickers/rand", th.GetRandomTicker).Methods("GET")
     apiRouter.HandleFunc("/tickers", th.GetTickers).Methods("GET")
     apiRouter.HandleFunc("/tickers/{id:[0-9]+}", th.GetTicker).Methods("GET")
-    passwordRouter.HandleFunc("/tickers", th.PostTickers).Methods("POST")
     apiRouter.HandleFunc("/achievements", th.GetAchievements).Methods("GET")
+    passwordRouter.HandleFunc("/tickers", th.PostTickers).Methods("POST")
+    passwordRouter.HandleFunc("/tickers", th.DeleteTicker).Methods("DELETE")
     passwordRouter.HandleFunc("/achievements/addform", th.GetAchievementsAddform).Methods("GET")
 
     http.Handle("/", apiRouter)
 
     log.Println("*** INFO: Available Routes:")
-    apiRouter.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
+    router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
         t, err := route.GetPathTemplate()
         if err != nil {
             return err
